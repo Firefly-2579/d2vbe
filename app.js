@@ -614,6 +614,10 @@ app.post('/delete-account', async (req, res) => {
 
 //################# FAST APIS #############################
 
+const model1Url = process.env.MODEL1_URL;
+const model2Url = process.env.MODEL2_URL;
+const model3Url = process.env.MODEL3_URL;
+
 
 
 const diskUpload = multer({ dest: "uploads/" });
@@ -642,7 +646,7 @@ app.post("/process-voice", diskUpload.single("speaker_wav"), async (req, res) =>
         form.append("speaker_wav", fs.createReadStream(outputPath));
         form.append("text", text);
 
-        const response = await axios.post("http://localhost:8000/synthesize", form, {
+        const response = await axios.post(`${model1Url}/synthesize`, form, {
           headers: form.getHeaders(),
           responseType: "stream",                   // to get back audio stream
         });
@@ -714,7 +718,7 @@ app.post("/process-doc-voice1", memoryUpload.single("file"), async (req, res) =>
 
         console.log("Sending text to FastAPI, length:", extractedText.length);
         
-        const response = await axios.post("http://127.0.0.1:8081/synthesize", form, {
+        const response = await axios.post(`${model2Url}/synthesize`, form, {
             headers: form.getHeaders(),
             responseType: "stream"
         });
@@ -749,7 +753,7 @@ app.post("/process-doc-voice2", memoryUpload.single("file"), async (req, res) =>
 
         console.log("Sending text to FastAPI, length:", extractedText.length);
         
-        const response = await axios.post("http://127.0.0.1:8082/synthesize", form, {
+        const response = await axios.post(`${model3Url}/synthesize`, form, {
             headers: form.getHeaders(),
             responseType: "stream"
         });
