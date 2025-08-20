@@ -768,6 +768,11 @@ app.post("/process-doc-voice2", memoryUpload.single("file"), async (req, res) =>
 /* app.listen(3000,()=>{
     console.log("Node js server started");
 })*/
+
+app.get("/", (req, res) => {
+  res.send("Backend running on Render");
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
