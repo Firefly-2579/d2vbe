@@ -765,7 +765,12 @@ app.post("/process-doc-voice2", memoryUpload.single("file"), async (req, res) =>
     }
 });
 
- app.listen(3000,()=>{
+/* app.listen(3000,()=>{
     console.log("Node js server started");
-})
+})*/
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Node.js server started on port ${PORT}`);
+});
 
