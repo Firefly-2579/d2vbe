@@ -319,7 +319,7 @@ app.post('/forgot-password',async (req,res) => {
     console.log('Reset Token Expiration',resetTokenExpiration);
 
     const hashedOtp = await bcrypt.hash(otp.toString(), 10);
-    user.otp = otp;                                   // Save OTP in the user document
+    user.otp = hashedOtp;                                   // Save OTP in the user document
     user.resetTokenExpiration = resetTokenExpiration; // OTP expires in 10 min
     
     await user.save();
@@ -367,11 +367,11 @@ app.post('/reset-password', async (req, res) => {
     });
   }
 
-  const strongPasswordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+  const strongPasswordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
   if (!strongPasswordRegex.test(newPassword)) {
     return res.status(400).send({
       status: 'error',
-      message: 'Password must be at least 6 characters long and include uppercase, lowercase, and numbers.'
+      message: 'Password must be at least 8 characters long and include uppercase, lowercase, special character and number.'
     });
   }
 
