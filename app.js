@@ -80,6 +80,8 @@ app.post('/send-otp', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
 
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
     // Store in memory
     tempOtpStore[email] = { otp, expiresAt };
 
@@ -113,7 +115,7 @@ app.post('/send-otp', async (req, res) => {
 });
 
 //verify-for-email
-app.post('/verify-for-email', (req, res) => {
+app.post('/verify-for-email',async (req, res) => {
   const { email, otp } = req.body;
 
   const record = tempOtpStore[email];
@@ -127,7 +129,8 @@ app.post('/verify-for-email', (req, res) => {
     return res.status(400).json({ status: 'error', message: 'OTP expired' });
   }
 
-  if (record.otp !== otp.trim()) {
+  const isMatch = await bcrypt.compare(otp.trim(), record.otp);
+  if (!isMatch) {
     return res.status(400).json({ status: 'error', message: 'Invalid OTP' });
   }
 
@@ -281,7 +284,8 @@ app.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'OTP has expired. Please repeat the process.' });
     }
 
-    if (user.otp !== trimmedOtp) {
+    const isMatch = await bcrypt.compare(trimmedOtp, user.otp)
+    if (isMatch) {
       console.log('OTP mismatch:', user.otp, '!=', trimmedOtp);
       return res.status(400).json({ status: 'error', message: 'Invalid code. Please try again.' });
     }
@@ -314,6 +318,7 @@ app.post('/forgot-password',async (req,res) => {
     console.log('Generated OTP',otp);
     console.log('Reset Token Expiration',resetTokenExpiration);
 
+    const hashedOtp = await bcrypt.hash(otp.toString(), 10);
     user.otp = otp;                                   // Save OTP in the user document
     user.resetTokenExpiration = resetTokenExpiration; // OTP expires in 10 min
     
