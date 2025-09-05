@@ -83,7 +83,7 @@ app.post('/send-otp', async (req, res) => {
     const hashedOtp = await bcrypt.hash(otp, 10);
 
     // Store in memory
-    tempOtpStore[email] = { otp, expiresAt };
+    tempOtpStore[email] = { hashedOtp, expiresAt };
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -129,7 +129,7 @@ app.post('/verify-for-email',async (req, res) => {
     return res.status(400).json({ status: 'error', message: 'OTP expired' });
   }
 
-  const isMatch = await bcrypt.compare(otp.trim(), record.otp);
+  const isMatch = await bcrypt.compare(otp.trim(), record.hashedOtp);
   if (!isMatch) {
     return res.status(400).json({ status: 'error', message: 'Invalid OTP' });
   }
