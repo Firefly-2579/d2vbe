@@ -285,7 +285,7 @@ app.post('/verify-otp', async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(trimmedOtp, user.otp)
-    if (isMatch) {
+    if (!isMatch) {
       console.log('OTP mismatch:', user.otp, '!=', trimmedOtp);
       return res.status(400).json({ status: 'error', message: 'Invalid code. Please try again.' });
     }
