@@ -220,14 +220,29 @@ app.post("/userdata",async(req,res)=>{
 
 //updateprofile api   //4
 app.post('/update-profile', async (req, res) => {
-  const{token, username} = req.body;
-  const user = await verifyTokenAndGetUser(token);
-  if (!user) return res.status(401).json({ success: false, message: 'Unauthorized'});
+  try{
+     const{token, username} = req.body;
+     const user = await verifyTokenAndGetUser(token);
+     if (!user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized'});
+    }
 
   user.username = username;
-  await user.save();
 
-  res.json({ success: true, message: 'Username updated successfully' });
+  try {
+      await user.save();
+      return res.json({ success: true, message: 'Username updated successfully' });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({ success: false, message: 'Username already exists' });
+      }
+      throw err; 
+    }
+
+  } catch (err) {
+    console.error("Error in /update-profile:", err);
+    return res.status(500).send({ success: false, message: 'Server error' });
+  }
 });
 
 
