@@ -615,15 +615,11 @@ app.post('/delete-account', async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch audio" });
   }
 }); 
-
-
 //################# FAST APIS #############################
 
 const model1Url = process.env.MODEL1_URL;
 const model2Url = process.env.MODEL2_URL;
 const model3Url = process.env.MODEL3_URL;
-
-
 
 const diskUpload = multer({ dest: "uploads/" });
 
@@ -702,7 +698,17 @@ async function extractText(buffer, originalname) {                   // extract 
     } else {
         throw new Error("Unsupported file type");
     }
-    return text.slice(0, 200).trim();
+   
+    text = text.trim();
+    const maxChars = 150;
+    if (text.length <= maxChars) return text;
+    let chunk = text.slice(0, maxChars);
+    let cut = Math.max(chunk.lastIndexOf("."), chunk.lastIndexOf("?"), chunk.lastIndexOf("!"));
+    if (cut > 50) { 
+        return chunk.slice(0, cut + 1);
+    }
+    let spaceCut = chunk.lastIndexOf(" ");
+    return spaceCut > 0 ? chunk.slice(0, spaceCut) : chunk;
 }
 
 app.post("/process-doc-voice1", memoryUpload.single("file"), async (req, res) => {
