@@ -220,28 +220,28 @@ app.post("/userdata",async(req,res)=>{
 
 //updateprofile api   //4
 app.post('/update-profile', async (req, res) => {
-  try{
-     const{token, username} = req.body;
-     const user = await verifyTokenAndGetUser(token);
-     if (!user) {
-      return res.status(401).json({ success: false, message: 'Unauthorized'});
+ try{
+  const{token, username} = req.body;
+  const user = await verifyTokenAndGetUser(token);
+  if (!user){ return res.status(401).json({ success: false, message: 'Unauthorized'});
+  }
+  const trimmed = username.trim();
+    const usernameRegex = /^(?=.{3,20}$)(?=.*[A-Za-z])[A-Za-z0-9_]+$/;
+    if (!usernameRegex.test(trimmed)) {
+      return res.status(400).json({
+        success: false,
+        message: "Username must be 3–20 chars, only letters, numbers, underscores"
+      });
     }
-
-  user.username = username;
-
-  try {
-      await user.save();
-      return res.json({ success: true, message: 'Username updated successfully' });
-    } catch (err) {
-      if (err.code === 11000) {
-        return res.status(400).json({ success: false, message: 'Username already exists' });
-      }
-      throw err; 
-    }
-
+  user.username = trimmed;
+  await user.save();
+  res.json({ success: true, message: 'Username updated successfully' });
   } catch (err) {
-    console.error("Error in /update-profile:", err);
-    return res.status(500).send({ success: false, message: 'Server error' });
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Username already exists" });
+    }
+    console.error("Server Error", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
