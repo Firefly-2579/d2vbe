@@ -233,13 +233,14 @@ app.post('/update-profile', async (req, res) => {
         message: "Username must be 3–20 chars, only letters, numbers, underscores"
       });
     }
+    const existingUser = await User.findOne({ username: trimmed, _id: { $ne: user._id } });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Username already exists" });
+    }
   user.username = trimmed;
   await user.save();
   res.json({ success: true, message: 'Username updated successfully' });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ success: false, message: "Username already exists" });
-    }
     console.error("Server Error", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
